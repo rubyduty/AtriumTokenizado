@@ -1,0 +1,24 @@
+{
+  "name": "atrium",
+  "version": "1.0.0",
+  "description": "Atrium — API de gestión de usuarios y tokens con interfaz SaaS profesional",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c violet,cyan \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run prisma:migrate --prefix backend",
+    "db:seed": "npm run prisma:seed --prefix backend",
+    "test": "npm test --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "setup": "npm install && npm install --prefix backend && npm install --prefix frontend && npm run db:migrate && npm run db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "info": {
+    "name": "Atrium — Users & Tokens API",
+    "description": "Colección oficial para probar la API de Atrium (usuarios, autenticación y tokens de sesión).\n\n1. Arranca el backend en http://localhost:4000\n2. Ejecuta Login — el test guarda automáticamente `token`\n3. Prueba PATCH name con el Bearer ya configurado",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "description": "Comprueba que la API y la base de datos están operativas."
+          },
+          "response": [
+            {
+              "name": "Online",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"API operativa\",\n  \"data\": { \"status\": \"online\", \"database\": \"connected\" }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET Users (first 10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users",
+            "description": "Devuelve los 10 primeros usuarios sin contraseñas."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users",
+            "description": "Crea un usuario. La contraseña se hashea con bcrypt (cost 12)."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Name (auth)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Nombre\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/name",
+            "description": "Actualiza el nombre del usuario autenticado. Requiere Authorization: Bearer TOKEN."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login OK', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json.success).to.eql(true);",
+                  "  if (json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@atrium.dev\",\n  \"password\": \"Demo123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Inicia sesión. El script de test guarda el token en la variable de colección `token`."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Login (credenciales incorrectas)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@atrium.dev\",\n  \"password\": \"WrongPass1!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Debe devolver 401 con message Credenciales incorrectas."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
